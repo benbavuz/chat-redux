@@ -2,20 +2,61 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import { createStore, combineReducers } from 'redux';
+import { createStore, combineReducers, applyMiddleware, compose } from 'redux';
+
+// import logger middleware
+import { logger } from 'redux-logger';
+// import redux promise
+import reduxPromise from 'redux-promise';
 
 // internal modules
 import App from './components/app';
 import '../assets/stylesheets/application.scss';
 
+// import reducers
+import MessagesReducer from "./reducers/messages_reducer";
+import selectedChannelReducer from "./reducers/selected_channel_reducer";
+
 // State and reducers
+
+// const dummyMessages = [
+//   {
+//     "id":1,
+//     "author":"anonymous92",
+//     "content":"Hello world!",
+//     "created_at":"2017-09-26T23:03:16.365Z"
+//   },
+//   { "id":2,
+//     "author":"anonymous77",
+//     "content":"My name is anonymous77",
+//     "created_at":"2017-09-26T23:03:21.194Z"
+//   }
+// ]
+
+const initialState = {
+  messages: [],
+  channels: ["general", "react", "paris"],
+  selectedChannel: "general",
+  currentUser: "Ben",
+  // currentUser: window.prompt("Hello stranger,what is your name?")
+};
+
+const identityReducer = (state = null) => state;
+
 const reducers = combineReducers({
-  changeMe: (state = null, action) => state
+  messages: MessagesReducer,
+  selectedChannel: selectedChannelReducer,
+  currentUser: identityReducer,
+  channels: identityReducer,
 });
+
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+const middlewares = composeEnhancers(applyMiddleware(logger, reduxPromise));
+
 
 // render an instance of the component in the DOM
 ReactDOM.render(
-  <Provider store={createStore(reducers)}>
+  <Provider store={createStore(reducers, initialState, middlewares)}>
     <App />
   </Provider>,
   document.getElementById('root')
